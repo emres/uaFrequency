@@ -46,7 +46,6 @@ for file in files:
             break
 
     for word in wordSet:
-
         word = word.strip().strip(',').strip()
 
         if len(word) > 1:   
