@@ -35,7 +35,7 @@ Note that it does not turn on '-H':
 Specify comma-separated lists of file name suffixes or patterns to
 accept or reject:
 
--R gif,jpg,jpeg,png,mp3,wav,mpg,mpeg,doc,ppt,xls,docx,js,css,bmp,JPG,swf,ico,Download.aspx,download.aspx
+-R gif,GIF,jpg,jpeg,png,mp3,wav,mpg,mpeg,doc,pdf,PDF,ppt,xls,docx,js,css,bmp,JPG,swf,ico,Download.aspx,download.aspx
 
 Specify download quota for automatic retrievals. The value can be
 specified in bytes (default), kilobytes (with 'k' suffix), or
