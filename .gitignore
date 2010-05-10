@@ -1,1 +1,4 @@
 www.ua.ac.be*
+*.pyc
+*.db
+*.txt
