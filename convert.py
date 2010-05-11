@@ -9,8 +9,10 @@ htmlJS = re.compile('<script .*?>.*?</script>', re.I | re.M | re.DOTALL)
 htmlComment = re.compile('<!--.*?-->', re.I | re.M | re.DOTALL)
 htmlTag = re.compile('<.*?>', re.I | re.M | re.DOTALL) 
 htmlEntity     = re.compile('&.*?;', re.I | re.M | re.DOTALL) 
+contextRegEx  = re.compile('main.aspx@c=((%2A)|\.)(.*?)&', re.DOTALL)
+contextRegEx2 = re.compile('main.aspx@c=((%2A)|\.)(.*?)$')
 
-files = glob.glob('www.ua.ac.be/*')
+files = glob.glob('www.ua.ac.be_1/*')
 
 numFiles = len(files)
 dummyCounter = 0
@@ -40,10 +42,18 @@ for file in files:
     url = "http://" + url
 
     urlContext = "UNKNOWN"
-    for key in contextData.context.keys():
-        if file.find(key) > 1:
-            urlContext = contextData.context[key]
-            break
+    match = contextRegEx.search(file)
+    if match is not None: 
+        if match.group(3) is None or match.group(3) == '':
+            match = contextRegEx2.search(file)
+            if match is not None:
+                urlContext = contextData.context.get(match.group(3), "UNKNOWN")
+        else:
+            urlContext = contextData.context.get(match.group(3), "UNKNOWN")
+    else:
+        match = contextRegEx2.search(file)
+        if match is not None:
+            urlContext = contextData.context.get(match.group(3), "UNKNOWN")
 
     for word in wordSet:
         word = word.strip().strip(',').strip()
@@ -68,11 +78,11 @@ for file in files:
 
     dummyCounter = dummyCounter + 1
 
-    if dummyCounter % 10 == 0:
+    if dummyCounter % 100 == 0:
         percentFileProcessed = str((100.0 * dummyCounter) / numFiles)[0:4]
         print '%i out of %i files processed - %%%s' % (dummyCounter, numFiles, percentFileProcessed)
     
-    if dummyCounter > 100:
+    if dummyCounter >= 500:
         break
 
 conn.commit()
