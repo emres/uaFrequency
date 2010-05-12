@@ -6,7 +6,7 @@ echo Start time : %startTime%
 
 rm frequency.db
 python createDB.py
-python convert.py
+python convert.py -n %1
 
 FOR /F "tokens=*" %%i IN ('time /T') DO SET endTime=%%i 
 
