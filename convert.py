@@ -51,12 +51,9 @@ dummyCounter = 0
 
 print "The total number of files = %i" % numFiles
 
-conn = sqlite3.connect('frequency.db')
+conn = sqlite3.connect('frequency.db', isolation_level = "DEFERRED")
 conn.text_factory = str
 c = conn.cursor()
-
-mainFrequency = dict()
-wordReverseIndex = dict()
 
 for file in files:
     fileContents = open(file).read()
@@ -65,7 +62,15 @@ for file in files:
     fileContents = htmlTag.sub(' ', fileContents)
     fileContents = htmlEntity.sub(' ', fileContents)
 
-    words = fileContents.split()
+    tmpWords = fileContents.split()
+    words = []
+
+    for i in range(len(tmpWords)):
+        word = tmpWords[i].strip()
+        word = word.rstrip(';\'')
+        word = word.strip(',/:"\(\)')
+        if len(word) >= 2 and len(word) <= 25:
+            words.append(word)
 
     wordSet = set(words)
 
@@ -89,34 +94,26 @@ for file in files:
             urlContext = contextData.context.get(match.group(3), "UNKNOWN")
 
     for word in wordSet:
-        word = word.strip()
-        word = word.rstrip(';\'')
-        word = word.strip(',/:"\(\)')
-       
         wordFrequency = 0
 
-        if len(word) >= 2 and len(word) <= 30:
-
-            #match = unicodeNonAlphanumeric.search(word)
-            #if match is None:
-            if True:
-                wordFrequency = string.count(fileContents, word)
+        #match = unicodeNonAlphanumeric.search(word)
+        #if match is None:
+        wordFrequency = string.count(fileContents, word)
          
-                c.execute("""SELECT * FROM mainFrequency WHERE word = ?""" , (word,))
-                if c.fetchone() is None:
-                    c.execute("""INSERT INTO mainFrequency VALUES (?, 1)""", (word,))
+        c.execute("""SELECT * FROM mainFrequency WHERE word = ?""" , (word,))
+        if c.fetchone() is None:
+            c.execute("""INSERT INTO mainFrequency VALUES (?, 1)""", (word,))            
+        else:
+            c.execute("""UPDATE mainFrequency SET frequency = frequency + ? WHERE word = ?""", (wordFrequency, word,))         
 
-                else:
-                    c.execute("""UPDATE mainFrequency SET frequency = frequency + ? WHERE word = ?""", (wordFrequency, word,))         
-
-                c.execute("""SELECT * FROM wordReverseIndex WHERE word = ? AND url = ?""", (word, url,))
-                if c.fetchone() is None:
-                    c.execute("""INSERT INTO wordReverseIndex(word, url, context) VALUES (?, ?, ?)""", (word, url, urlContext,)) 
+        #c.execute("""SELECT * FROM wordReverseIndex WHERE word = ? AND url = ?""", (word, url,))
+        #if c.fetchone() is None:
+        c.execute("""INSERT INTO wordReverseIndex(word, url, context) VALUES (?, ?, ?)""", (word, url, urlContext,)) 
                             
 
     dummyCounter = dummyCounter + 1
 
-    if dummyCounter % 200 == 0:
+    if dummyCounter % 300 == 0:
         percentFileProcessed = str((100.0 * dummyCounter) / numFiles)[0:4]
         print '%i out of %i files processed - %%%s' % (dummyCounter, numFiles, percentFileProcessed)
         conn.commit()
