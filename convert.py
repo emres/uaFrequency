@@ -100,7 +100,7 @@ for file in files:
         #if match is None:
         wordFrequency = string.count(fileContents, word)
          
-        c.execute("""SELECT * FROM mainFrequency WHERE word = ?""" , (word,))
+        c.execute("""SELECT 1 FROM mainFrequency WHERE word = ? LIMIT 1""" , (word,))
         if c.fetchone() is None:
             c.execute("""INSERT INTO mainFrequency VALUES (?, 1)""", (word,))            
         else:
