@@ -12,7 +12,6 @@ import psyco
 psyco.full()
 psyco.log()
 
-
 def usage():
     print " "
     print "Usage: convert.py -n maximumNumberOfFilesToBeProcessed"
@@ -72,6 +71,10 @@ for file in files:
         if len(word) >= 2 and len(word) <= 25:
             words.append(word)
 
+    wordFrequencies = {}
+    for word in words:
+        wordFrequencies[word] = words.count(word)
+
     wordSet = set(words)
 
     url = file.replace("%2A", "*")
@@ -98,20 +101,18 @@ for file in files:
 
         #match = unicodeNonAlphanumeric.search(word)
         #if match is None:
-        wordFrequency = string.count(fileContents, word)
-         
+        wordFrequency = wordFrequencies[word]         
+
         c.execute("""SELECT 1 FROM mainFrequency WHERE word = ? LIMIT 1""" , (word,))
         if c.fetchone() is None:
             c.execute("""INSERT INTO mainFrequency VALUES (?, 1)""", (word,))            
         else:
             c.execute("""UPDATE mainFrequency SET frequency = frequency + ? WHERE word = ?""", (wordFrequency, word,))         
 
-        #c.execute("""SELECT * FROM wordReverseIndex WHERE word = ? AND url = ?""", (word, url,))
-        #if c.fetchone() is None:
-        c.execute("""INSERT INTO wordReverseIndex(word, url, context) VALUES (?, ?, ?)""", (word, url, urlContext,)) 
-                            
+        c.execute("""INSERT INTO wordReverseIndex(word, url, context) VALUES (?, ?, ?)""", (word, url, urlContext,))
 
-    dummyCounter = dummyCounter + 1
+    
+    dummyCounter = dummyCounter + 1     
 
     if dummyCounter % 300 == 0:
         percentFileProcessed = str((100.0 * dummyCounter) / numFiles)[0:4]
