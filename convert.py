@@ -96,6 +96,10 @@ for file in files:
         if match is not None:
             urlContext = contextData.context.get(match.group(3), "UNKNOWN")
 
+    lastRowId = 0
+    c.execute("""INSERT INTO urlTable(url) VALUES (?)""", (url,))
+    lastRowId = c.lastrowid
+
     for word in wordSet:
         wordFrequency = 0
 
@@ -109,7 +113,7 @@ for file in files:
         else:
             c.execute("""UPDATE mainFrequency SET frequency = frequency + ? WHERE word = ?""", (wordFrequency, word,))         
 
-        c.execute("""INSERT INTO wordReverseIndex(word, url, context) VALUES (?, ?, ?)""", (word, url, urlContext,))
+        c.execute("""INSERT INTO wordReverseIndex(word, url, context) VALUES (?, ?, ?)""", (word, lastRowId, urlContext,))
 
     
     dummyCounter = dummyCounter + 1     
