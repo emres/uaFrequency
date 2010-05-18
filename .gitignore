@@ -1,4 +1,6 @@
-www.ua.ac.be*
+*www.ua.ac.be*
 *.pyc
 *.db
+*.mdb
+*.accdb
 *.txt
