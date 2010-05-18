@@ -42,6 +42,8 @@ htmlEntity     = re.compile('&.*?;', re.I | re.M | re.DOTALL)
 contextRegEx  = re.compile('main.aspx@c=((%2A)|\.)(.*?)&', re.DOTALL)
 contextRegEx2 = re.compile('main.aspx@c=((%2A)|\.)(.*?)$')
 unicodeNonAlphanumeric = re.compile('\W+', re.UNICODE)
+reNum = re.compile('\d+')
+rePunct = re.compile('[-/\.%:]+')
 
 files = glob.glob('www.ua.ac.be/*')
 
@@ -66,10 +68,13 @@ for file in files:
 
     for i in range(len(tmpWords)):
         word = tmpWords[i].strip()
-        word = word.rstrip(';\'')
-        word = word.strip(',/:"\(\)')
-        if len(word) >= 2 and len(word) <= 25:
-            words.append(word)
+        word = word.rstrip('!?,.;\'')
+        word = word.strip('/:"\(\)')
+        word = word.lower()
+        if len(word) >= 2 and len(word) <= 27:            
+            if word.find('@') < 0 and word.find('http') < 0:
+                if len(rePunct.sub("", reNum.sub("", word))) > 1:
+                    words.append(word)
 
     wordFrequencies = {}
     for word in words:
